@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Windows Calculator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #ccc;
+    }
+    .calculator {
+      background:rgb(223, 241, 241);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 10px 10px 30px rgba(219, 243, 244, 0.5);
+      max-width: 380px;
+      color: white;
+    }
+    .calculator input {
+      font-size: 2rem;
+      height: 70px;
+      text-align: right;
+      border: none;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    .btn-calc {
+  width: 70px;
+  height: 70px;
+  margin: 5px;
+  font-size: 1.5rem;
+  border-radius: 15px; /* rounded corners, not circle */
+  border: none;
+  transition: transform 0.1s;
+}
+    .btn-calc:active {
+      transform: scale(0.95);
+    }
+    .btn-num { background-color: rgb(105, 189, 237); color:black; }
+    .btn-op  { background-color: #ff9500; color: white; }
+    .btn-extra { background-color: #666; color: white; }
+    .btn-eq { background-color: #4cd964; color: black; }
+    .btn-clear { background-color: #ff3b30; color: white; }
+
+    .history {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      height: 500px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <!-- Calculator -->
+    <div class="col-md-6">
+      <div class="calculator">
+        <form method="post" id="calcForm">
+          <input type="text" name="input" id="inputField" class="form-control" readonly value="<?= htmlspecialchars($display) ?>" />
+
+          <!-- Button Grid -->
+          <div class="d-flex flex-wrap justify-content-center">
+            <?php
+              $buttons = [
+                [['extra', '%', 'btn-extra'], ['extra', '√', 'btn-extra'], ['extra', 'x²', 'btn-extra'], ['extra', 'log', 'btn-extra']],
+                [['allclear', 'AC', 'btn-clear'], ['clear', 'C', 'btn-clear'], ['op', '(', 'btn-op'], ['op', ')', 'btn-op']],
+                [['num', '7', 'btn-num'], ['num', '8', 'btn-num'], ['num', '9', 'btn-num'], ['op', '/', 'btn-op']],
+                [['num', '4', 'btn-num'], ['num', '5', 'btn-num'], ['num', '6', 'btn-num'], ['op', '*', 'btn-op']],
+                [['num', '1', 'btn-num'], ['num', '2', 'btn-num'], ['num', '3', 'btn-num'], ['op', '-', 'btn-op']],
+                [['num', '0', 'btn-num'], ['op', '.', 'btn-num'], ['equal', '=', 'btn-eq'], ['op', '+', 'btn-op']],
+              ];
+              foreach ($buttons as $row) {
+                echo '<div class="d-flex justify-content-center w-100">';
+                foreach ($row as [$name, $val, $class]) {
+                  echo "<button type='submit' name='$name' value='$val' class='btn-calc $class'>$val</button>";
+                }
+                echo '</div>';
+              }
+            ?>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="col-md-4">
+      <div class="history">
+        <h5>History</h5>
+        <ul class="list-group list-group-flush">
+          <?php foreach ($_SESSION['history'] as $entry): ?>
+            <li class="list-group-item"><?= htmlspecialchars($entry) ?></li>
+          <?php endforeach; ?>
+          <?php if (empty($_SESSION['history'])): ?>
+            <li class="list-group-item text-muted">No history</li>
+          <?php endif; ?>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Keyboard Support -->
+<script>
+document.addEventListener("keydown", function (e) {
+  const input = document.getElementById("inputField");
+  const form = document.getElementById("calcForm");
+
+  const key = e.key;
+  if ("0123456789+-*/.()".includes(key)) {
+    e.preventDefault();
+    input.value += key;
+    form.querySelector("input[name='input']").value = input.value;
+  } else if (key === "Enter" || key === "=") {
+    e.preventDefault();
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = "equal";
+    hidden.value = "=";
+    form.appendChild(hidden);
+    form.submit();
+  } else if (key === "Backspace") {
+    e.preventDefault();
+    input.value = input.value.slice(0, -1);
+    form.querySelector("input[name='input']").value = input.value;
+  } else if (key.toLowerCase() === "a") {
+    e.preventDefault();
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = "allclear";
+    hidden.value = "ac";
+    form.appendChild(hidden);
+    form.submit();
+  } else if (key.toLowerCase() === "c") {
+    e.preventDefault();
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = "clear";
+    hidden.value = "c";
+    form.appendChild(hidden);
+    form.submit();
+  }
+});
+</script>
+
+</body>
+</html>
